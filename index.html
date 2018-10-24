@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="http://at.alicdn.com/t/font_859992_0tt7skb3gbs.css"/>
+    <style type="text/css">
+    	.iconfont{
+    		font-family: Muiicons;
+		    font-size: 2.4em;
+		    font-weight: 400;
+		    font-style: normal;
+		    line-height: 1;
+		    display: inline-block;
+		    text-decoration: none;
+		    -webkit-font-smoothing: antialiased;
+    	}
+    </style>
+    <script type="text/javascript" charset="utf-8">
+      	mui.init();
+    </script>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<h1 class="mui-title">选择模式</h1>
+	</header>
+	<div class="mui-content">
+		<ul class="mui-table-view mui-grid-view mui-grid-9">
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4" url="./items/simple.html">
+	            <a>
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">简单识图</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">身份证扫描</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">银行卡扫描</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">人脸识别</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">以图搜图</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">logo识别</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">植物识别</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">动物识别</div>
+	            </a>
+	        </li>
+	        <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+	            <a href="#">
+	                <span class="iconfont icon-saomiao"></span>
+	                <div class="mui-media-body">车型识别</div>
+	            </a>
+	        </li>
+	    </ul>		
+	</div>
+	<script type="text/javascript">
+		mui.init();
+		
+		mui('.mui-content').on('tap','li',function(){
+			let url = this.getAttribute('url');
+			if(url){
+				mui.openWindow({
+					url:url,
+					id:url
+				})
+			}else{
+				mui.toast('尚在开发中...');
+			}
+		})
+	</script>
+</body>
+</html>

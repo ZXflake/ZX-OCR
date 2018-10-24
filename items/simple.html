@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="../js/mui.min.js"></script>
+    <link href="../css/mui.min.css" rel="stylesheet"/>
+	<title>Document</title>
+	<style type="text/css">
+		.mui-content{
+			padding: 20%;
+		}
+		.mui-content button{
+			width: 100%;
+		}
+		#tmp{
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">简单模式</h1>
+		<a class="mui-icon mui-icon-bars mui-pull-right"></a>
+	</header>
+	<div class="mui-content">
+		<div class="text">图片压缩没做，注意点流量</div>
+		<img src="../img/preview.png" alt="" id="tmp" style="width: 100%; height: 100%;" />
+		<button type="button" id="send" class="mui-btn mui-btn-primary mui-btn-outlined">提交</button>
+		<div id="result"></div>
+	</div>
+	
+	<script type="text/javascript">
+		
+		mui.init({
+			swipeBack:true //关闭-右滑关闭功能
+		});
+    	let local = {
+    		home:'http://106.14.132.158:8080/BaiduOCR/',
+			base_path : '_doc/',
+			camera_path : '_doc/cameratmp/',
+			uploadCacheSize:0,
+			submitSwitch:true
+		}
+    	let files = [];
+		/*图片选择方式*/
+		mui(".mui-pull-right")[0].addEventListener('tap', function() {		//打开拍照或者相册选择
+			if(mui.os.plus) {
+					var a = [{
+						title: "拍照"
+					}, {
+						title: "相册"
+					}];
+					plus.nativeUI.actionSheet({
+						cancel: "取消",
+						buttons: a
+					}, function(b) {
+						if(b.index == 1) {
+							getCameraPic();		//拍照
+						} else if(b.index == 2) {
+							getGallery();		//相册
+						}
+					});
+				}
+		},false);
+		/*调用拍照*/
+		function getCameraPic(){
+			plus.camera.getCamera().captureImage(function(e){
+		            plus.io.resolveLocalFileSystemURL(e, function(entry) {
+		            var path = entry.toLocalURL();
+		            mui("#tmp")[0].setAttribute("src",path);
+		            files.push(path);
+		            //不旋转也不压缩
+	//	        	$("#tmp")[0].onload = function(){
+	//		        	EXIF.getData(this, function() {
+	//						var Orientation = EXIF.getTag(this,'Orientation');
+	//						if(Orientation == 6){			//旋转（也包含压缩）
+	//							p.rotateImage(path,success,90);
+	//				        }else{
+	//				        	p.compressImage(path,success);	//压缩
+	//				        }
+	//
+	//
+	//				    });
+	//				    $("#tmp")[0].onload = null;
+	//	        	};
+	
+		            }, function(e) {
+		                mui.toast("读取拍照文件错误：" + e.message);
+		            });
+	
+		        },function(err){
+		        	//console.error("拍照失败：" + err.message);
+		        	//也不发送bug
+		        	//sendBug(err.message,window.location.href);
+		        },{
+		        	filename:local.camera_path
+		        });
+		}
+		/*调用相册*/
+		function getGallery(){
+			plus.gallery.pick(function(e) {
+			    plus.io.resolveLocalFileSystemURL(e, function(entry) {
+		            var path = entry.toLocalURL();
+		            mui("#tmp")[0].setAttribute("src",path);
+		            files.push(path);
+		            
+			    },function(e){
+			    	//sendBug(e.message,window.location.href);
+			    });
+		  });
+		}
+
+		/*点击提交*/
+		mui('#send')[0].addEventListener('tap',function(e){			//上传照片和其他数据
+			if(files.length === 0){
+				mui.toast('没有选择图片哦');
+				return ;
+			}
+			if(local.submitSwitch){
+				local.submitSwitch = false;
+				plus.nativeUI.showWaiting("上传中");
+				task = plus.uploader.createUpload( local.home+'ocr/mui/getSimple',
+					{ method:"POST",blocksize:204800,priority:100},
+					function ( t, status ) {				//完成回调
+						// 上传完成
+						local.submitSwitch = true;
+						//p.delUploadCache();			//清除所有上传的临时文件
+						/*if(t.responseText.indexOf("<!DOCTYPE") > -1){		//防止因拦截返回登录页面到前台，而无法正确解析消息
+							mui.toast("登录失效，请重新登录");
+							return ;
+						}
+						var response = eval("("+t.responseText+")");
+						if(response.msg == '登录失效'){							//登录失效的时候的消息，或因拦截而收不到此消息
+							mui.toast("登录失效，请重新登录");
+							return ;
+						}*/
+						if ( status == 200 ) {
+							plus.nativeUI.closeWaiting();
+							var response = eval("("+t.responseText+")");
+							let re = response.words_result.map(item => "<p>"+item.words+"</p>").join('');
+							mui("#result")[0].innerHTML = re;
+							mui.toast("解析完成");
+						} else {
+							plus.nativeUI.closeWaiting();
+							mui.toast("解析失败");
+						}
+					}
+				);
+
+				for(var i=0;i<files.length;i++){
+					task.addFile( files[i], {key:i.toString()} );		//使用相同的键，文件会被覆盖
+				}
+//				for(var k in optiondata){
+//					//console.info(k+":"+optiondata[k]);
+//					task.addData( k, (optiondata[k] ? optiondata[k].toString() : "0") );
+//				}
+				/*if(plus.os.name == 'Android' && parseFloat(plus.os.version) < 5.0){		//安卓5.0以下后台获取不到session
+					task.addData('userid',localStorage.username.toString());
+				}				*/
+				task.addEventListener( "statechanged", function( upload, status ) {		//进度条
+					//mui('body').progressbar().setProgress(upload.uploadedSize*100/upload.totalSize);
+				}, false );
+//				mui('body').progressbar({
+//					progress: 0.001
+//				}).show();
+				task.start();
+			}
+
+		})
+
+	</script>
+</body>
+</html>
